@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: foo
+          image: docker.io/hashicorp/http-echo:0.2.3
+          args:
+            - "-text=foo"
+          ports:
+            - containerPort: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8080
+      name: http
+      appProtocol: http
+      targetPort: 5678
+---
+# Automatically created by s0 controller
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-s0
+spec:
+  type: ExternalName
+  externalName: envoy.s0-system.svc.cluster.local

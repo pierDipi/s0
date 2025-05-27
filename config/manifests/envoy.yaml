@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy
+  namespace: s0-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: envoy
+  template:
+    metadata:
+      labels:
+        app: envoy
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: envoy
+          # TODO: Use production image
+          image: docker.io/envoyproxy/envoy:debug-v1.33-latest@sha256:7f5892b80104ebb56a78bdb970e7299b21a221608a1f734c49fefeea43668f6b
+          args:
+            - "-c"
+            - "/etc/envoy/envoy-config.yaml"
+            - "-l"
+            - "debug"
+            - "--component-log-level"
+            - "upstream:debug,connection:trace"
+          ports:
+            - containerPort: 10000
+            - containerPort: 9901
+          volumeMounts:
+            - name: envoy-config
+              mountPath: /etc/envoy
+      volumes:
+        - name: envoy-config
+          configMap:
+            name: envoy-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: envoy
+  namespace: s0-system
+spec:
+  type: NodePort
+  selector:
+    app: envoy
+  ports:
+    - port: 10000
+      targetPort: 10000
+      name: http
+      appProtocol: http
+      nodePort: 30950
+    - port: 80
+      targetPort: 10000
+      name: http-internal
+      appProtocol: http
