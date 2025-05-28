@@ -1,4 +1,4 @@
-# S0 - A scale to 0 prototype for Kubernetes
+# S0 - A scale to and from 0 system for Kubernetes
 
 > S0 is a prototype and not suitable for production usage, it's meant to demonstrate how scale to and from 0 for HTTP
 > traffic can be implemented with a reduced set of components and moving parts when compared to Knative Serving or
